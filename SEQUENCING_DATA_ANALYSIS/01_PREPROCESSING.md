@@ -1,4 +1,4 @@
-# 01 - PRE-PROCESSING
+# PRE-PROCESSING
 
 
 ## Extracting FASTQ files from BCL
@@ -228,4 +228,4 @@ cd ${SBDIR}
 ls *_STAR_Aligned_Assigned_Sorted.bam | sed "s/_STAR_Aligned_Assigned_Sorted.bam//g" | xargs -I % -n 1 -P 48 sh -c 'echo %; <path_to_umi_tools_executable>/umi_tools count --per-gene --gene-tag=XT --per-cell --stdin=%_STAR_Aligned_Assigned_Sorted.bam --stdout=%_Counts.tsv.gz --log=%_Counts.log --error=%_Counts.err --wide-format-cell-counts'
 ```
 
------------
+-----
