@@ -1,10 +1,11 @@
 # UPDATE RAW COUNT TABLES
-
-## WT SAMPLES
 - python/3.7.x-anaconda
 - gcc/8.3.0
 - hdf5_18/1.8.17
 - R/4.0.2-gccmkl
+
+
+## WT SAMPLES
 ```{R}
 ####################
 ## LOAD LIBRARIES ##
@@ -74,19 +75,13 @@ for (i in 1:length(myLibWT))
 	save(counttable, file = paste(libname, "_Counts_NovaSeq.RData", sep = ""))
 	}
 
-#########
-## END ##
-#########
+## MANUALLY GZIP THE COUNT TABLES USING "GZIP" COMMAND
 ```
 <br></br>
 
 
 
 ## KO SAMPLES
-- python/3.7.x-anaconda
-- gcc/8.3.0
-- hdf5_18/1.8.17
-- R/4.0.2-gccmkl
 ```{R}
 ####################
 ## LOAD LIBRARIES ##
@@ -156,19 +151,13 @@ for (i in 1:length(myLibKO))
 	save(counttable, file = paste(libname, "_Counts_NovaSeq.RData", sep = ""))
 	}
 
-#########
-## END ##
-#########
+## MANUALLY GZIP THE COUNT TABLES USING "GZIP" COMMAND
 ```
 <br></br>
 
 
 
 ## HU SAMPLES
-- python/3.7.x-anaconda
-- gcc/8.3.0
-- hdf5_18/1.8.17
-- R/4.0.2-gccmkl
 ```{R}
 ####################
 ## LOAD LIBRARIES ##
@@ -238,9 +227,7 @@ for (i in 1:length(myLibHU))
 	save(counttable, file = paste(libname, "_Counts_NovaSeq.RData", sep = ""))
 	}
 
-#########
-## END ##
-#########
+## MANUALLY GZIP THE COUNT TABLES USING "GZIP" COMMAND
 ```
 
 -----
