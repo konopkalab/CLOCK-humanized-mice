@@ -19,11 +19,9 @@ library(reshape2)
 library(clustree)
 set.seed(10)
 
-
 ##------------------------------------
 ## reference gene symbol list
 ref <- read.table("gencode.vM17.protein_coding_gene_id_symbol.txt.gz", header = TRUE, sep = "\t")
-
 
 ##------------------------------------
 ## Read CellBender H5
@@ -79,12 +77,10 @@ print(dim(yl.data)) ## 21967 45970
 p07.wt.data <- yl.data
 save(p07.wt.data, file = "YL_P07_WT_CB_COUNTS.RData")
 
-
 ##------------------------------------
 ## Initialize the Seurat object with the raw (non-normalized data).
 seuObj <- CreateSeuratObject(counts = p07.wt.data, project = "YL_P07_WT_CB")
 print(dim(seuObj)) ## 21967 24801
-
 
 ##------------------------------------
 ## Add and update meta data
@@ -131,7 +127,6 @@ ggsave(filename = "SEURAT_NK_QC_1.pdf", plot = p9, width = 8, height = 4, units 
 ggsave(filename = "SEURAT_NK_QC_2.pdf", plot = p2, width = 5, height = 4, units = "in", dpi = 150)
 ggsave(filename = "SEURAT_NK_QC_3.pdf", plot = p3, width = 5, height = 4, units = "in", dpi = 150)
 
-
 ##------------------------------------
 ## Data Normalization
 seuObj <- NormalizeData(seuObj)
@@ -149,7 +144,6 @@ p5 <- LabelPoints(plot = p4, points = top90, repel = TRUE)
 
 ggsave(filename = "SEURAT_NK_VARGENES_1.pdf", plot = p4, width = 8, height = 4, units = "in", dpi = 150)
 ggsave(filename = "SEURAT_NK_VARGENES_2.pdf", plot = p5, width = 8, height = 4, units = "in", dpi = 150)
-
 
 ##------------------------------------
 ## Data Scaling
@@ -171,7 +165,6 @@ p7 <- JackStrawPlot(seuObj, dims = 1:100)
 ggsave(filename = "SEURAT_NK_PCA_1.pdf", plot = p6, width = 6, height = 4, units = "in", dpi = 150)
 ggsave(filename = "SEURAT_NK_PCA_2.pdf", plot = p7, width = 12, height = 6, units = "in", dpi = 150)
 
-
 ##------------------------------------
 ## Data Clustering
 ## IDENTIFY PCS
@@ -184,7 +177,6 @@ print(selpcs)
 seuObj <- FindNeighbors(seuObj, dims = 1:selpcs)
 seuObj <- FindClusters(seuObj, resolution = c(0.2, 0.4, 0.6, 0.8, 1.0, 0.8, 1.4, 1.6, 1.8, 2.0))
 seuObj <- RunUMAP(seuObj, dims = 1:selpcs)
-
 
 ##------------------------------------
 ## Save RData
@@ -242,7 +234,6 @@ table(seuObjDF$GenoAgeSample, seuObjDF$DF.classifications_0.25_0.005_2308)
 #   WT_P07_11    1199   10207
 #   WT_P07_16     611    5794
 
-
 seuMeta <- as.data.frame(seuObjDF@meta.data)
 seuMetaFiltTemp <- seuMeta[seuMeta$DF.classifications_0.25_0.005_2480 == "Singlet",]
 seuMetaFilt <- seuMetaFiltTemp[seuMetaFiltTemp$DF.classifications_0.25_0.005_2308 == "Singlet",]
@@ -269,6 +260,535 @@ seuObjDF$DoubletFinder[is.na(seuObjDF$DoubletFinder)] <- "Discarded"
 ## Save RData
 save(seuObjDF, file = "YL_P07_WT_CB_DF.RData")
 save(seuMeta, seuMetaFilt, file = "YL_P07_WT_CB_DF_FILT_META.RData")
+```
+<br></br>
+
+
+## P07 KO
+- python/3.7.x-anaconda
+- gcc/8.3.0
+- hdf5_18/1.8.17
+- R/4.0.2-gccmkl
+```{R}
+##------------------------------------
+## SEURAT CLUSTERING
+##------------------------------------
+## Libraries
+rm(list = ls())
+library(dplyr)
+library(Seurat)
+library(patchwork)
+library(ggplot2)
+library(reshape2)
+library(clustree)
+set.seed(10)
+
+##------------------------------------
+## reference gene symbol list
+ref <- read.table("gencode.vM17.protein_coding_gene_id_symbol.txt.gz", header = TRUE, sep = "\t")
+
+##------------------------------------
+## Read CellBender H5
+p07ko01 <- Read10X_h5("/work/Neuroinformatics_Core/akulk1/MANUAL/YL_DATA/CELLBENDER_MANUAL/P07_KO/YL_P07_KO_01_CB/CellBender_Out_filtered.h5") # 21967  9512
+colnames(p07ko01) <- paste("YL_P07_KO_01", colnames(p07ko01), sep = "_")
+
+p07ko06 <- Read10X_h5("/work/Neuroinformatics_Core/akulk1/MANUAL/YL_DATA/CELLBENDER_MANUAL/P07_KO/YL_P07_KO_06_CB/CellBender_Out_filtered.h5") # 21967  16
+colnames(p07ko06) <- paste("YL_P07_KO_06", colnames(p07ko06), sep = "_")
+
+p07ko09 <- Read10X_h5("/work/Neuroinformatics_Core/akulk1/MANUAL/YL_DATA/CELLBENDER_MANUAL/P07_KO/YL_P07_KO_09_CB/CellBender_Out_filtered.h5") # 21967  10599
+colnames(p07ko09) <- paste("YL_P07_KO_09", colnames(p07ko09), sep = "_")
+
+p07ko18 <- Read10X_h5("/work/Neuroinformatics_Core/akulk1/MANUAL/YL_DATA/CELLBENDER_MANUAL/P07_KO/YL_P07_KO_18_CB/CellBender_Out_filtered.h5") # 21967  7934
+colnames(p07ko18) <- paste("YL_P07_KO_18", colnames(p07ko18), sep = "_")
+
+##------------------------------------
+## fetch genes or rows corresponding to gencode protein coding gene symbols
+p07ko01.temp <- p07ko01[row.names(p07ko01) %in% ref$GeneSymbol,]
+p07ko06.temp <- p07ko06[row.names(p07ko06) %in% ref$GeneSymbol,]
+p07ko09.temp <- p07ko09[row.names(p07ko09) %in% ref$GeneSymbol,]
+p07ko18.temp <- p07ko18[row.names(p07ko18) %in% ref$GeneSymbol,]
+
+##------------------------------------
+## make a data from from matrix
+NK_P07_KO_01 <- as.data.frame(as.matrix(p07ko01.temp))
+NK_P07_KO_06 <- as.data.frame(as.matrix(p07ko06.temp))
+NK_P07_KO_09 <- as.data.frame(as.matrix(p07ko09.temp))
+NK_P07_KO_18 <- as.data.frame(as.matrix(p07ko18.temp))
+
+##------------------------------------
+## add gene symbol as a column
+NK_P07_KO_01$Genes <- row.names(NK_P07_KO_01)
+NK_P07_KO_06$Genes <- row.names(NK_P07_KO_06)
+NK_P07_KO_09$Genes <- row.names(NK_P07_KO_09)
+NK_P07_KO_18$Genes <- row.names(NK_P07_KO_18)
+
+##------------------------------------
+## combine individual tables into a giant data frame
+## Sample "YL_P07_KO_06" is dropped being an outlier 
+dataCombined <- list("NK_P07_KO_01" = NK_P07_KO_01, "NK_P07_KO_09" = NK_P07_KO_09, "NK_P07_KO_18" = NK_P07_KO_18)
+
+combinedData <- Reduce(function(x, y) { merge(x, y, all = TRUE, by = "Genes") } , dataCombined)
+row.names(combinedData) <- combinedData$Genes
+combinedData$Genes <- NULL
+
+yl.data <- combinedData[row.names(combinedData) %in% ref$GeneSymbol,]
+
+yl.data[is.na(yl.data)] <- 0
+print(dim(yl.data)) ## 21967 45970
+
+##------------------------------------
+## Save Count Table
+p07.ko.data <- yl.data
+save(p07.ko.data, file = "YL_P07_KO_CB_COUNTS.RData")
+
+##------------------------------------
+## Initialize the Seurat object with the raw (non-normalized data).
+seuObj <- CreateSeuratObject(counts = p07.ko.data, project = "YL_P07_KO_CB")
+print(dim(seuObj)) ## 21967 24801
+
+##------------------------------------
+## Add and update meta data
+metaTemp <- as.data.frame(seuObj@meta.data)
+metaTemp2 <- as.data.frame(matrix(unlist(strsplit(row.names(metaTemp), "_")), ncol = 5, byrow = TRUE))
+row.names(metaTemp2) <- row.names(metaTemp)
+metaData <- merge(metaTemp, metaTemp2, by = "row.names")
+row.names(metaData) <- metaData$Row.names
+metaData$Row.names <- NULL
+colnames(metaData) <- c("Ident", "nUMI", "nGenes", "Project", "Age", "Genotype", "Sample", "CellBarcode")
+
+metaSample <- metaData$Sample
+names(metaSample) <- row.names(metaData)
+
+metaAge <- metaData$Age
+names(metaAge) <- row.names(metaData)
+
+metaGeno <- metaData$Genotype
+names(metaGeno) <- row.names(metaData)
+
+seuObj$Genotype <- metaGeno
+seuObj$Sample <- metaSample
+seuObj$Age <- metaAge
+seuObj$GenoAgeSample <- paste(seuObj$Genotype, seuObj$Age, seuObj$Sample, sep = "_")
+
+##------------------------------------
+## Calculate Percent Mito
+seuObj[["pMito_RNA"]] <- PercentageFeatureSet(seuObj, pattern = "^mt-")
+
+## Set default identities to GenoAgeSample
+Idents(seuObj) <- "GenoAgeSample"
+
+table(seuObj@active.ident)
+# KO_P07_01 KO_P07_09 KO_P07_18 
+#      9512     10599      7934
+
+##------------------------------------
+## Visualize Data QC
+p9 <- VlnPlot(seuObj, features = c("nFeature_RNA", "nCount_RNA", "pMito_RNA"), ncol = 3, pt.size = 0)
+p2 <- FeatureScatter(seuObj, feature1 = "nCount_RNA", feature2 = "pMito_RNA")
+p3 <- FeatureScatter(seuObj, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+
+ggsave(filename = "SEURAT_NK_QC_1.pdf", plot = p9, width = 8, height = 4, units = "in", dpi = 150)
+ggsave(filename = "SEURAT_NK_QC_2.pdf", plot = p2, width = 5, height = 4, units = "in", dpi = 150)
+ggsave(filename = "SEURAT_NK_QC_3.pdf", plot = p3, width = 5, height = 4, units = "in", dpi = 150)
+
+##------------------------------------
+## Data Normalization
+seuObj <- NormalizeData(seuObj)
+
+##------------------------------------
+## Identify top 2000 highly variable genes
+seuObj <- FindVariableFeatures(seuObj, selection.method = "vst", nfeatures = 2000)
+
+## Identify the 10 most highly variable genes
+top90 <- head(VariableFeatures(seuObj), 10)
+
+## plot variable features with and without labels
+p4 <- VariableFeaturePlot(seuObj)
+p5 <- LabelPoints(plot = p4, points = top90, repel = TRUE)
+
+ggsave(filename = "SEURAT_NK_VARGENES_1.pdf", plot = p4, width = 8, height = 4, units = "in", dpi = 150)
+ggsave(filename = "SEURAT_NK_VARGENES_2.pdf", plot = p5, width = 8, height = 4, units = "in", dpi = 150)
+
+##------------------------------------
+## Data Scaling
+# all.genes <- rownames(seuObj)
+seuObj <- ScaleData(seuObj, vars.to.regress = c("nCount_RNA"))
+
+##------------------------------------
+## PCA & Jackstraw
+## Compute PCA
+seuObj <- RunPCA(seuObj, features = VariableFeatures(object = seuObj), npcs = 100)
+
+## Compute and Score Jackstraw
+seuObj <- JackStraw(seuObj, num.replicate = 100, dims = 100)
+seuObj <- ScoreJackStraw(seuObj, dims = 1:100)
+
+## Plot PCA loadings and Jackstraw scores
+p6 <- ElbowPlot(seuObj, ndims = 100)
+p7 <- JackStrawPlot(seuObj, dims = 1:100)
+
+ggsave(filename = "SEURAT_NK_PCA_1.pdf", plot = p6, width = 6, height = 4, units = "in", dpi = 150)
+ggsave(filename = "SEURAT_NK_PCA_2.pdf", plot = p7, width = 12, height = 6, units = "in", dpi = 150)
+
+##------------------------------------
+## Data Clustering
+## IDENTIFY PCS
+pcScores <- seuObj@reductions$pca@jackstraw$overall.p.values
+pcScoresNoSign <- pcScores[pcScores[,2] > 0.05,]
+selpcs <- min(pcScoresNoSign[,1]) - 1
+print(selpcs)
+# 59
+
+seuObj <- FindNeighbors(seuObj, dims = 1:selpcs)
+seuObj <- FindClusters(seuObj, resolution = c(0.2, 0.4, 0.6, 0.8, 1.0, 0.8, 1.4, 1.6, 1.8, 2.0))
+seuObj <- RunUMAP(seuObj, dims = 1:selpcs)
+
+##------------------------------------
+## Save RData
+save(seuObj, file = "YL_P07_WT_CB_CLUST.RData")
+
+
+##------------------------------------
+## DOUBLET FINDER
+##------------------------------------
+## Libraries
+rm(list = ls())
+library(dplyr)
+library(patchwork)
+library(ggplot2)
+library(reshape2)
+library(clustree)
+library(Seurat)
+library(DoubletFinder)
+set.seed(10)
+
+load("YL_P07_WT_CB_CLUST.RData")
+# seuObj
+
+pcScores <- seuObj@reductions$pca@jackstraw$overall.p.values
+pcScoresNoSign <- pcScores[pcScores[,2] > 0.05,]
+selpcs <- min(pcScoresNoSign[,1]) - 1
+print(selpcs)
+# 59
+
+## pK Identification (no ground-truth) ---------------------------------------------------------------------------------------
+sweep.res.list_str <- paramSweep_v3(seuObj, PCs = 1:selpcs, sct = FALSE)
+sweep.stats_str <- summarizeSweep(sweep.res.list_str, GT = FALSE)
+bcmvn_str <- find.pK(sweep.stats_str)
+selpk <- 0.005
+
+## Homotypic Doublet Proportion Estimate -------------------------------------------------------------------------------------
+homotypic.prop <- modelHomotypic(seuObj@meta.data$RNA_snn_res.0.8) ## ex: annotations <- seu_kidney@meta.data$ClusteringResults
+nExp_poi <- round(0.1*nrow(seuObj@meta.data))  ## Assuming 10% doublet formation rate - tailor for your dataset
+nExp_poi.adj <- round(nExp_poi*(1-homotypic.prop))
+
+## Run DoubletFinder with varying classification stringencies ----------------------------------------------------------------
+seuObjDF <- doubletFinder_v3(seuObj, PCs = 1:selpcs, pN = 0.25, pK = selpk, nExp = nExp_poi, reuse.pANN = FALSE, sct = FALSE)
+
+seuObjDF <- doubletFinder_v3(seuObjDF, PCs = 1:selpcs, pN = 0.25, pK = selpk, nExp = nExp_poi.adj, reuse.pANN = "pANN_0.25_0.005_2804", sct = FALSE)
+
+table(seuObjDF$GenoAgeSample, seuObjDF$DF.classifications_0.25_0.005_2804)        
+#             Doublet Singlet
+#   KO_P07_01    1390    8122
+#   KO_P07_09     646    9953
+#   KO_P07_18     768    7166
+
+table(seuObjDF$GenoAgeSample, seuObjDF$DF.classifications_0.25_0.005_2634)             
+#             Doublet Singlet
+#   KO_P07_01    1308    8204
+#   KO_P07_09     611    9988
+#   KO_P07_18     715    7219
+
+seuMeta <- as.data.frame(seuObjDF@meta.data)
+seuMetaFiltTemp <- seuMeta[seuMeta$DF.classifications_0.25_0.005_2804 == "Singlet",]
+seuMetaFilt <- seuMetaFiltTemp[seuMetaFiltTemp$DF.classifications_0.25_0.005_2634 == "Singlet",]
+
+## Before Doublets Removal
+table(seuMeta$GenoAgeSample)
+# KO_P07_01 KO_P07_09 KO_P07_18 
+#      9512     10599      7934
+
+## After Doublets Removal
+table(seuMetaFilt$GenoAgeSample)
+# KO_P07_01 KO_P07_09 KO_P07_18 
+#      8122      9953      7166
+
+seuMetaFilt$DoubletFinder <- rep("Retained", nrow(seuMetaFilt))
+
+df.meta <- seuMetaFilt$DoubletFinder
+names(df.meta) <- row.names(seuMetaFilt)
+
+seuObjDF$DoubletFinder <- df.meta
+seuObjDF$DoubletFinder[is.na(seuObjDF$DoubletFinder)] <- "Discarded"
+
+##------------------------------------
+## Save RData
+save(seuObjDF, file = "YL_P07_KO_CB_DF.RData")
+save(seuMeta, seuMetaFilt, file = "YL_P07_KO_CB_DF_FILT_META.RData")
+```
+<br></br>
+
+
+## P07 HU
+- python/3.7.x-anaconda
+- gcc/8.3.0
+- hdf5_18/1.8.17
+- R/4.0.2-gccmkl
+```{R}
+##------------------------------------
+## SEURAT CLUSTERING
+##------------------------------------
+## Libraries
+rm(list = ls())
+library(dplyr)
+library(Seurat)
+library(patchwork)
+library(ggplot2)
+library(reshape2)
+library(clustree)
+set.seed(10)
+
+##------------------------------------
+## reference gene symbol list
+ref <- read.table("gencode.vM17.protein_coding_gene_id_symbol.txt.gz", header = TRUE, sep = "\t")
+
+##------------------------------------
+## Read CellBender H5
+p07hu03 <- Read10X_h5("/work/Neuroinformatics_Core/akulk1/MANUAL/YL_DATA/CELLBENDER_MANUAL/P07_HU/YL_P07_HU_03_CB/CellBender_Out_filtered.h5") # 21967  10538
+colnames(p07hu03) <- paste("YL_P07_HU_03", colnames(p07hu03), sep = "_")
+
+p07hu05 <- Read10X_h5("/work/Neuroinformatics_Core/akulk1/MANUAL/YL_DATA/CELLBENDER_MANUAL/P07_HU/YL_P07_HU_05_CB/CellBender_Out_filtered.h5") # 21967  8668
+colnames(p07hu05) <- paste("YL_P07_HU_05", colnames(p07hu05), sep = "_")
+
+p07hu12 <- Read10X_h5("/work/Neuroinformatics_Core/akulk1/MANUAL/YL_DATA/CELLBENDER_MANUAL/P07_HU/YL_P07_HU_12_CB/CellBender_Out_filtered.h5") # 21967  11589
+colnames(p07hu12) <- paste("YL_P07_HU_12", colnames(p07hu12), sep = "_")
+
+p07hu17 <- Read10X_h5("/work/Neuroinformatics_Core/akulk1/MANUAL/YL_DATA/CELLBENDER_MANUAL/P07_HU/YL_P07_HU_17_CB/CellBender_Out_filtered.h5") # 21967  13
+colnames(p07hu17) <- paste("YL_P07_HU_17", colnames(p07hu17), sep = "_")
+
+##------------------------------------
+## fetch genes or rows corresponding to gencode protein coding gene symbols
+p07hu03.temp <- p07hu03[row.names(p07hu03) %in% ref$GeneSymbol,]
+p07hu05.temp <- p07hu05[row.names(p07hu05) %in% ref$GeneSymbol,]
+p07hu12.temp <- p07hu12[row.names(p07hu12) %in% ref$GeneSymbol,]
+p07hu17.temp <- p07hu17[row.names(p07hu17) %in% ref$GeneSymbol,]
+
+##------------------------------------
+## make a data from from matrix
+NK_P07_HU_03 <- as.data.frame(as.matrix(p07hu03.temp))
+NK_P07_HU_05 <- as.data.frame(as.matrix(p07hu05.temp))
+NK_P07_HU_12 <- as.data.frame(as.matrix(p07hu12.temp))
+NK_P07_HU_17 <- as.data.frame(as.matrix(p07hu17.temp))
+
+##------------------------------------
+## add gene symbol as a column
+NK_P07_HU_03$Genes <- row.names(NK_P07_HU_03)
+NK_P07_HU_05$Genes <- row.names(NK_P07_HU_05)
+NK_P07_HU_12$Genes <- row.names(NK_P07_HU_12)
+NK_P07_HU_17$Genes <- row.names(NK_P07_HU_17)
+
+##------------------------------------
+## combine individual tables into a giant data frame
+dataCombined <- list("NK_P07_HU_03" = NK_P07_HU_03, "NK_P07_HU_05" = NK_P07_HU_05, "NK_P07_HU_12" = NK_P07_HU_12)
+
+combinedData <- Reduce(function(x, y) { merge(x, y, all = TRUE, by = "Genes") } , dataCombined)
+row.names(combinedData) <- combinedData$Genes
+combinedData$Genes <- NULL
+
+yl.data <- combinedData[row.names(combinedData) %in% ref$GeneSymbol,]
+
+yl.data[is.na(yl.data)] <- 0
+print(dim(yl.data)) ## 21967 30808
+
+##------------------------------------
+## Save Count Table
+p07.hu.data <- yl.data
+save(p07.hu.data, file = "YL_P07_HU_CB_COUNTS.RData")
+
+##------------------------------------
+## Initialize the Seurat object with the raw (non-normalized data).
+seuObj <- CreateSeuratObject(counts = p07.hu.data, project = "YL_P07_HU_CB")
+print(dim(seuObj)) ## 21967 30808
+
+##------------------------------------
+## Add and update meta data
+metaTemp <- as.data.frame(seuObj@meta.data)
+metaTemp2 <- as.data.frame(matrix(unlist(strsplit(row.names(metaTemp), "_")), ncol = 5, byrow = TRUE))
+row.names(metaTemp2) <- row.names(metaTemp)
+metaData <- merge(metaTemp, metaTemp2, by = "row.names")
+row.names(metaData) <- metaData$Row.names
+metaData$Row.names <- NULL
+colnames(metaData) <- c("Ident", "nUMI", "nGenes", "Project", "Age", "Genotype", "Sample", "CellBarcode")
+
+metaSample <- metaData$Sample
+names(metaSample) <- row.names(metaData)
+
+metaAge <- metaData$Age
+names(metaAge) <- row.names(metaData)
+
+metaGeno <- metaData$Genotype
+names(metaGeno) <- row.names(metaData)
+
+seuObj$Genotype <- metaGeno
+seuObj$Sample <- metaSample
+seuObj$Age <- metaAge
+seuObj$GenoAgeSample <- paste(seuObj$Genotype, seuObj$Age, seuObj$Sample, sep = "_")
+
+##------------------------------------
+## Calculate Percent Mito
+seuObj[["pMito_RNA"]] <- PercentageFeatureSet(seuObj, pattern = "^mt-")
+
+## Set default identities to GenoAgeSample
+Idents(seuObj) <- "GenoAgeSample"
+
+table(seuObj@active.ident)
+# HU_P07_03 HU_P07_05 HU_P07_12
+#     10538      8668     11589
+
+##------------------------------------
+## Visualize Data QC
+p9 <- VlnPlot(seuObj, features = c("nFeature_RNA", "nCount_RNA", "pMito_RNA"), ncol = 3, pt.size = 0)
+p2 <- FeatureScatter(seuObj, feature1 = "nCount_RNA", feature2 = "pMito_RNA")
+p3 <- FeatureScatter(seuObj, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+
+ggsave(filename = "SEURAT_NK_QC_1.pdf", plot = p9, width = 8, height = 4, units = "in", dpi = 150)
+ggsave(filename = "SEURAT_NK_QC_2.pdf", plot = p2, width = 5, height = 4, units = "in", dpi = 150)
+ggsave(filename = "SEURAT_NK_QC_3.pdf", plot = p3, width = 5, height = 4, units = "in", dpi = 150)
+
+##------------------------------------
+## Data Normalization
+seuObj <- NormalizeData(seuObj)
+
+##------------------------------------
+## Identify top 2000 highly variable genes
+seuObj <- FindVariableFeatures(seuObj, selection.method = "vst", nfeatures = 2000)
+
+## Identify the 10 most highly variable genes
+top90 <- head(VariableFeatures(seuObj), 10)
+
+## plot variable features with and without labels
+p4 <- VariableFeaturePlot(seuObj)
+p5 <- LabelPoints(plot = p4, points = top90, repel = TRUE)
+
+ggsave(filename = "SEURAT_NK_VARGENES_1.pdf", plot = p4, width = 8, height = 4, units = "in", dpi = 150)
+ggsave(filename = "SEURAT_NK_VARGENES_2.pdf", plot = p5, width = 8, height = 4, units = "in", dpi = 150)
+
+##------------------------------------
+## Data Scaling
+# all.genes <- rownames(seuObj)
+seuObj <- ScaleData(seuObj, vars.to.regress = c("nCount_RNA"))
+
+##------------------------------------
+## PCA & Jackstraw
+## Compute PCA
+seuObj <- RunPCA(seuObj, features = VariableFeatures(object = seuObj), npcs = 100)
+
+## Compute and Score Jackstraw
+seuObj <- JackStraw(seuObj, num.replicate = 100, dims = 100)
+seuObj <- ScoreJackStraw(seuObj, dims = 1:100)
+
+## Plot PCA loadings and Jackstraw scores
+p6 <- ElbowPlot(seuObj, ndims = 100)
+p7 <- JackStrawPlot(seuObj, dims = 1:100)
+
+ggsave(filename = "SEURAT_NK_PCA_1.pdf", plot = p6, width = 6, height = 4, units = "in", dpi = 150)
+ggsave(filename = "SEURAT_NK_PCA_2.pdf", plot = p7, width = 12, height = 6, units = "in", dpi = 150)
+
+##------------------------------------
+## Data Clustering
+## IDENTIFY PCS
+pcScores <- seuObj@reductions$pca@jackstraw$overall.p.values
+pcScoresNoSign <- pcScores[pcScores[,2] > 0.05,]
+selpcs <- min(pcScoresNoSign[,1]) - 1
+print(selpcs)
+# 56
+
+seuObj <- FindNeighbors(seuObj, dims = 1:selpcs)
+seuObj <- FindClusters(seuObj, resolution = c(0.2, 0.4, 0.6, 0.8, 1.0, 0.8, 1.4, 1.6, 1.8, 2.0))
+seuObj <- RunUMAP(seuObj, dims = 1:selpcs)
+
+##------------------------------------
+## Save RData
+save(seuObj, file = "YL_P07_HU_CB_CLUST.RData")
+
+
+
+##------------------------------------
+## DOUBLET FINDER
+##------------------------------------
+## Libraries
+rm(list = ls())
+library(dplyr)
+library(patchwork)
+library(ggplot2)
+library(reshape2)
+library(clustree)
+library(Seurat)
+library(DoubletFinder)
+set.seed(10)
+
+load("YL_P07_HU_CB_CLUST.RData")
+# seuObj
+
+pcScores <- seuObj@reductions$pca@jackstraw$overall.p.values
+pcScoresNoSign <- pcScores[pcScores[,2] > 0.05,]
+selpcs <- min(pcScoresNoSign[,1]) - 1
+print(selpcs)
+# 56
+
+## pK Identification (no ground-truth) ---------------------------------------------------------------------------------------
+sweep.res.list_str <- paramSweep_v3(seuObj, PCs = 1:selpcs, sct = FALSE)
+sweep.stats_str <- summarizeSweep(sweep.res.list_str, GT = FALSE)
+bcmvn_str <- find.pK(sweep.stats_str)
+selpk <- 0.005
+
+## Homotypic Doublet Proportion Estimate -------------------------------------------------------------------------------------
+homotypic.prop <- modelHomotypic(seuObj@meta.data$RNA_snn_res.0.8) ## ex: annotations <- seu_kidney@meta.data$ClusteringResults
+nExp_poi <- round(0.1*nrow(seuObj@meta.data))  ## Assuming 10% doublet formation rate - tailor for your dataset
+nExp_poi.adj <- round(nExp_poi*(1-homotypic.prop))
+
+## Run DoubletFinder with varying classification stringencies ----------------------------------------------------------------
+seuObjDF <- doubletFinder_v3(seuObj, PCs = 1:selpcs, pN = 0.25, pK = selpk, nExp = nExp_poi, reuse.pANN = FALSE, sct = FALSE)
+seuObjDF <- doubletFinder_v3(seuObjDF, PCs = 1:selpcs, pN = 0.25, pK = selpk, nExp = nExp_poi.adj, reuse.pANN = "pANN_0.25_0.005_3080", sct = FALSE)
+
+table(seuObjDF$GenoAgeSample, seuObjDF$DF.classifications_0.25_0.005_3080)        
+#             Doublet Singlet
+#   HU_P07_03     725    9813
+#   HU_P07_05    1118    7550
+#   HU_P07_12    1237   10352
+
+table(seuObjDF$GenoAgeSample, seuObjDF$DF.classifications_0.25_0.005_2886)             
+#             Doublet Singlet
+#   HU_P07_03     671    9867
+#   HU_P07_05    1075    7593
+#   HU_P07_12    1140   10449
+
+seuMeta <- as.data.frame(seuObjDF@meta.data)
+seuMetaFiltTemp <- seuMeta[seuMeta$DF.classifications_0.25_0.005_3080 == "Singlet",]
+seuMetaFilt <- seuMetaFiltTemp[seuMetaFiltTemp$DF.classifications_0.25_0.005_2886 == "Singlet",]
+
+## Before Doublets Removal
+table(seuMeta$GenoAgeSample)
+# HU_P07_03 HU_P07_05 HU_P07_12 
+#     10538      8668     11589
+
+## After Doublets Removal
+table(seuMetaFilt$GenoAgeSample)
+# HU_P07_03 HU_P07_05 HU_P07_12 
+#      9813      7550     10352
+
+seuMetaFilt$DoubletFinder <- rep("Retained", nrow(seuMetaFilt))
+
+df.meta <- seuMetaFilt$DoubletFinder
+names(df.meta) <- row.names(seuMetaFilt)
+
+seuObjDF$DoubletFinder <- df.meta
+seuObjDF$DoubletFinder[is.na(seuObjDF$DoubletFinder)] <- "Discarded"
+
+##------------------------------------
+## Save RData
+save(seuObjDF, file = "YL_P07_HU_CB_DF.RData")
+save(seuMeta, seuMetaFilt, file = "YL_P07_HU_CB_DF_FILT_META.RData")
 ```
 <br></br>
 
