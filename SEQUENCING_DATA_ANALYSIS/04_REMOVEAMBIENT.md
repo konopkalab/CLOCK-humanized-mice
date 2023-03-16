@@ -1,32 +1,42 @@
 # REMOVE AMBIENT RNA USING CELLBENDER
-- python/3.7.x-anaconda
-- cellbender
 
 ## CELLBENDER FOR P07 | WT
+- python/3.7.x-anaconda
+- cellbender
 ```{sh}
 ls | grep -P "^YL_P07_WT" | xargs -I % -n 1 -P 48 sh -c 'echo %; cellbender remove-background --input % --output %/CellBender_Out.h5 --expected-cells 10000'
 ```
 
 ## CELLBENDER FOR P07 | KO
+- python/3.7.x-anaconda
+- cellbender
 ```{sh}
 ls | grep -P "^YL_P07_KO" | xargs -I % -n 1 -P 48 sh -c 'echo %; cellbender remove-background --input % --output %/CellBender_Out.h5 --expected-cells 10000'
 ```
 
 ## CELLBENDER FOR P07 | HU
+- python/3.7.x-anaconda
+- cellbender
 ```{sh}
 ls | grep -P "^YL_P07_HU" | xargs -I % -n 1 -P 48 sh -c 'echo %; cellbender remove-background --input % --output %/CellBender_Out.h5 --expected-cells 10000'
 ```
 ## CELLBENDER FOR P56 | WT
+- python/3.7.x-anaconda
+- cellbender
 ```{sh}
 ls | grep -P "^YL_P56_WT" | xargs -I % -n 1 -P 48 sh -c 'echo %; cellbender remove-background --input % --output %/CellBender_Out.h5 --expected-cells 10000'
 ```
 
 ## CELLBENDER FOR P56 | KO
+- python/3.7.x-anaconda
+- cellbender
 ```{sh}
 ls | grep -P "^YL_P56_KO" | xargs -I % -n 1 -P 48 sh -c 'echo %; cellbender remove-background --input % --output %/CellBender_Out.h5 --expected-cells 10000'
 ```
 
 ## CELLBENDER FOR P56 | HU
+- python/3.7.x-anaconda
+- cellbender
 ```{sh}
 ls | grep -P "^YL_P56_HU" | xargs -I % -n 1 -P 48 sh -c 'echo %; cellbender remove-background --input % --output %/CellBender_Out.h5 --expected-cells 10000'
 ```
@@ -202,9 +212,7 @@ save(dt.updated, file = "CLOCKSEQ_P07_P56_WT_HU_KO_CELLBENDER.RData")
 dt.cb <- subset(dt.updated, subset = CellBender == "Retained")
 
 save(dt.cb, file = "CLOCKSEQ_P07_P56_WT_HU_KO_CELLBENDER_RETAINED.RData")
-
 ```
-
 
 
 -----
