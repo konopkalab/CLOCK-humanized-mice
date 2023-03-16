@@ -289,16 +289,16 @@ ref <- read.table("gencode.vM17.protein_coding_gene_id_symbol.txt.gz", header = 
 
 ##------------------------------------
 ## Read CellBender H5
-p07ko01 <- Read10X_h5("/work/Neuroinformatics_Core/akulk1/MANUAL/YL_DATA/CELLBENDER_MANUAL/P07_KO/YL_P07_KO_01_CB/CellBender_Out_filtered.h5") # 21967  9512
+p07ko01 <- Read10X_h5("CELLBENDER_OUTPUT/P07_KO/YL_P07_KO_01_CB/CellBender_Out_filtered.h5") # 21967  9512
 colnames(p07ko01) <- paste("YL_P07_KO_01", colnames(p07ko01), sep = "_")
 
-p07ko06 <- Read10X_h5("/work/Neuroinformatics_Core/akulk1/MANUAL/YL_DATA/CELLBENDER_MANUAL/P07_KO/YL_P07_KO_06_CB/CellBender_Out_filtered.h5") # 21967  16
+p07ko06 <- Read10X_h5("CELLBENDER_OUTPUT/P07_KO/YL_P07_KO_06_CB/CellBender_Out_filtered.h5") # 21967  16
 colnames(p07ko06) <- paste("YL_P07_KO_06", colnames(p07ko06), sep = "_")
 
-p07ko09 <- Read10X_h5("/work/Neuroinformatics_Core/akulk1/MANUAL/YL_DATA/CELLBENDER_MANUAL/P07_KO/YL_P07_KO_09_CB/CellBender_Out_filtered.h5") # 21967  10599
+p07ko09 <- Read10X_h5("CELLBENDER_OUTPUT/P07_KO/YL_P07_KO_09_CB/CellBender_Out_filtered.h5") # 21967  10599
 colnames(p07ko09) <- paste("YL_P07_KO_09", colnames(p07ko09), sep = "_")
 
-p07ko18 <- Read10X_h5("/work/Neuroinformatics_Core/akulk1/MANUAL/YL_DATA/CELLBENDER_MANUAL/P07_KO/YL_P07_KO_18_CB/CellBender_Out_filtered.h5") # 21967  7934
+p07ko18 <- Read10X_h5("CELLBENDER_OUTPUT/P07_KO/YL_P07_KO_18_CB/CellBender_Out_filtered.h5") # 21967  7934
 colnames(p07ko18) <- paste("YL_P07_KO_18", colnames(p07ko18), sep = "_")
 
 ##------------------------------------
@@ -554,16 +554,16 @@ ref <- read.table("gencode.vM17.protein_coding_gene_id_symbol.txt.gz", header = 
 
 ##------------------------------------
 ## Read CellBender H5
-p07hu03 <- Read10X_h5("/work/Neuroinformatics_Core/akulk1/MANUAL/YL_DATA/CELLBENDER_MANUAL/P07_HU/YL_P07_HU_03_CB/CellBender_Out_filtered.h5") # 21967  10538
+p07hu03 <- Read10X_h5("CELLBENDER_OUTPUT/P07_HU/YL_P07_HU_03_CB/CellBender_Out_filtered.h5") # 21967  10538
 colnames(p07hu03) <- paste("YL_P07_HU_03", colnames(p07hu03), sep = "_")
 
-p07hu05 <- Read10X_h5("/work/Neuroinformatics_Core/akulk1/MANUAL/YL_DATA/CELLBENDER_MANUAL/P07_HU/YL_P07_HU_05_CB/CellBender_Out_filtered.h5") # 21967  8668
+p07hu05 <- Read10X_h5("CELLBENDER_OUTPUT/P07_HU/YL_P07_HU_05_CB/CellBender_Out_filtered.h5") # 21967  8668
 colnames(p07hu05) <- paste("YL_P07_HU_05", colnames(p07hu05), sep = "_")
 
-p07hu12 <- Read10X_h5("/work/Neuroinformatics_Core/akulk1/MANUAL/YL_DATA/CELLBENDER_MANUAL/P07_HU/YL_P07_HU_12_CB/CellBender_Out_filtered.h5") # 21967  11589
+p07hu12 <- Read10X_h5("CELLBENDER_OUTPUT/P07_HU/YL_P07_HU_12_CB/CellBender_Out_filtered.h5") # 21967  11589
 colnames(p07hu12) <- paste("YL_P07_HU_12", colnames(p07hu12), sep = "_")
 
-p07hu17 <- Read10X_h5("/work/Neuroinformatics_Core/akulk1/MANUAL/YL_DATA/CELLBENDER_MANUAL/P07_HU/YL_P07_HU_17_CB/CellBender_Out_filtered.h5") # 21967  13
+p07hu17 <- Read10X_h5("CELLBENDER_OUTPUT/P07_HU/YL_P07_HU_17_CB/CellBender_Out_filtered.h5") # 21967  13
 colnames(p07hu17) <- paste("YL_P07_HU_17", colnames(p07hu17), sep = "_")
 
 ##------------------------------------
@@ -589,6 +589,7 @@ NK_P07_HU_17$Genes <- row.names(NK_P07_HU_17)
 
 ##------------------------------------
 ## combine individual tables into a giant data frame
+## Sample "NK_P07_HU_17" is dropped being an outlier 
 dataCombined <- list("NK_P07_HU_03" = NK_P07_HU_03, "NK_P07_HU_05" = NK_P07_HU_05, "NK_P07_HU_12" = NK_P07_HU_12)
 
 combinedData <- Reduce(function(x, y) { merge(x, y, all = TRUE, by = "Genes") } , dataCombined)
