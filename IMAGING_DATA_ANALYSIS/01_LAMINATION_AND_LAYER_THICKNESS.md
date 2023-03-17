@@ -28,5 +28,6 @@ setLocation(0, 0, 700, 770);
 run("Set... ", "zoom=50");
 setTool("hand");
 waitForUser("Please go to ROI_ScaleBar. Click OK when done");
-
 ```
+
+-----
