@@ -1,4 +1,5 @@
 # SEGMENTS AND PUNCTA
+- [5_Segments&Puncta_FIJI.ijm](5_Segments&Puncta_FIJI.ijm)
 
 ```
 //get the list of files that will be processed in a batch and open files one by one
@@ -117,3 +118,5 @@ while (nImages>0) {
       } 
 }
 ```
+
+-----
