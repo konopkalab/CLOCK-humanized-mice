@@ -1,4 +1,5 @@
 # TRACE BRANCHES AND SHOLL ANALYSIS
+- [3_TraceBranches&ShollAnalysis_FIJI.ijm](3_TraceBranches&ShollAnalysis_FIJI.ijm)
 
 ```
 //all numbers in the script need to be modified base on the images and computer
@@ -55,5 +56,6 @@ run("IJ Robot", "order=Left_Click x_point=812 y_point=44 delay=40");
 run("IJ Robot", "order=Left_Click x_point=974 y_point=44 delay=40");
 run("IJ Robot", "order=Left_Click x_point=313 y_point=44 delay=40");
 run("IJ Robot", "order=Left_Click x_point=672 y_point=282 delay=40");
-
 ```
+
+-----
