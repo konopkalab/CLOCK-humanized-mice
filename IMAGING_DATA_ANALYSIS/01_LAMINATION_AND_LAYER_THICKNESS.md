@@ -1,3 +1,6 @@
+# LAMINATION AND LAYER THICKNESS
+
+```
 //open image, split channel, adjust window size and location
 open()
 name=getTitle;
@@ -25,14 +28,4 @@ run("Set... ", "zoom=50");
 setTool("hand");
 waitForUser("Please go to ROI_ScaleBar. Click OK when done");
 
-
-
-
-
-
-
-
-
-
-
-
+```
