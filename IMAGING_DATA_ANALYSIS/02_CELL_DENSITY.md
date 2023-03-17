@@ -1,4 +1,5 @@
 # CELL DENSITY
+- [2_CellDensity_FIJI.ijm](2_CellDensity_FIJI.ijm)
 
 ```
 //open image and adjust its size and location
@@ -349,5 +350,6 @@ while (nImages>0) {
           selectImage(nImages); 
           close(); 
       } 
-
 ```
+
+-----
