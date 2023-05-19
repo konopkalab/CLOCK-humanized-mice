@@ -1,5 +1,5 @@
 # STATISTICS
-- [6_Statistics_R.r](6_Statistics_R.r)
+- [01_Statistics.R](01_Statistics.R)
 
 ```{R}
 library(multcomp)
