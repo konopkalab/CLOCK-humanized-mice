@@ -21,8 +21,7 @@ set.seed(10)
 
 ## Seurat Preprocessing
 ```{R}
-## reference gene symbol list
-ref <- read.table("/project/Neuroinformatics_Core/Konopka_lab/akulk1/RESOURCES/GENOME_INDEX/Gencode_vH44/gencode.v44.basic.annotation.protein_coding_id_symbol.txt", header = TRUE, sep = "\t")
+rm(list = ls())
 
 ## FUNCTION TO FILTER CELLBARCODES (CB-RETAINED) AND GENES (REF-PROTEIN-CODING)
 filterCounts <- function(cbPath, dfPath, samplePrefix) {
