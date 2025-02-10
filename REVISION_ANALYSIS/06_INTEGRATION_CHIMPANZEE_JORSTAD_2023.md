@@ -16,9 +16,6 @@ library(scCustomize)
 library(ShinyCell)
 set.seed(10)
 
-## reference gene symbol list
-ref <- read.table("/project/RESOURCES/GENOME_INDEX/Gencode_vH44/gencode.v44.basic.annotation.protein_coding_id_symbol.txt", header = TRUE, sep = "\t")
-
 ## FUNCTION TO FILTER CELLBARCODES (CB-RETAINED) AND GENES (REF-PROTEIN-CODING)
 filterCounts <- function(cbPath, dfPath, samplePrefix) {
 print(samplePrefix)
