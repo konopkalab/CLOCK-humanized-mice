@@ -1,3 +1,6 @@
+# CLOCK EXPRESSION
+
+```{R}
 load(".RData")
 tab <- seuObj
 
@@ -18,3 +21,4 @@ log2_data <- log(expm1(log_data) + 1, 2)
 t = t(log2_data)
 exp_m <- t[,c("CLOCK")]
 result[n,i] <- mean(exp_m)
+```
